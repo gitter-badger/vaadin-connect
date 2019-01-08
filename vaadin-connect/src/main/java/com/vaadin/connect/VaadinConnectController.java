@@ -20,7 +20,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -81,6 +80,7 @@ public class VaadinConnectController {
    *      VaadinServiceNameChecker, ApplicationContext)
    */
   public static final String VAADIN_SERVICE_MAPPER_BEAN_QUALIFIER = "vaadinServiceMapper";
+  private static final String SERVICE_INVOCATION_HEADER = "vaadin-connect-service-invocation-exception";
 
   private final ObjectMapper vaadinServiceMapper;
   private final VaadinConnectOAuthAclChecker oauthChecker;
@@ -286,8 +286,6 @@ public class VaadinConnectController {
 
   private ResponseEntity<String> handleMethodExecutionError(String serviceName,
       String methodName, InvocationTargetException e) {
-    String serviceInvocationHeader = "serviceInvocationException";
-
     if (VaadinServiceException.class
         .isAssignableFrom(e.getCause().getClass())) {
       VaadinServiceException serviceException = ((VaadinServiceException) e
@@ -298,7 +296,7 @@ public class VaadinConnectController {
       return createResponseWithSerializedEntity(
           exceptionToResponseObject(serviceException),
           serializedEntity -> ResponseEntity.status(HttpStatus.BAD_REQUEST)
-              .header(serviceInvocationHeader, Boolean.TRUE.toString())
+              .header(SERVICE_INVOCATION_HEADER, Boolean.TRUE.toString())
               .body(serializedEntity),
           serviceName, methodName);
     } else {
@@ -307,7 +305,7 @@ public class VaadinConnectController {
           methodName);
       getLogger().error(errorMessage, e);
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-          .header(serviceInvocationHeader, Boolean.TRUE.toString())
+          .header(SERVICE_INVOCATION_HEADER, Boolean.TRUE.toString())
           .body(errorMessage);
     }
   }
@@ -315,13 +313,10 @@ public class VaadinConnectController {
   private Map<String, Object> exceptionToResponseObject(
       VaadinServiceException serviceException) {
     Map<String, Object> responseBody = new HashMap<>();
-    responseBody.put("type",
-        Collections
-            .singletonList(Optional.ofNullable(serviceException.getCause())
-                .orElse(serviceException).getClass().getName()));
-    responseBody.put("message",
-        Collections.singletonList(serviceException.getMessage()));
-    responseBody.put("details", serviceException.getDetails());
+    responseBody.put("type", Optional.ofNullable(serviceException.getCause())
+        .orElse(serviceException).getClass().getName());
+    responseBody.put("message", serviceException.getMessage());
+    responseBody.put("detail", serviceException.getDetail());
     return responseBody;
   }
 

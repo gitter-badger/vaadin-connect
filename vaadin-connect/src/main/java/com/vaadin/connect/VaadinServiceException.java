@@ -17,40 +17,40 @@
 package com.vaadin.connect;
 
 public class VaadinServiceException extends RuntimeException {
-  private final Object details;
+  private final Object detail;
 
   public VaadinServiceException(String message) {
     super(message);
-    this.details = null;
+    this.detail = null;
   }
 
-  public VaadinServiceException(String message, Object details) {
+  public VaadinServiceException(String message, Object detail) {
     super(message);
-    this.details = details;
+    this.detail = detail;
   }
 
   public VaadinServiceException(Throwable cause) {
     super(cause);
-    this.details = null;
+    this.detail = null;
   }
 
-  public VaadinServiceException(Throwable cause, Object details) {
+  public VaadinServiceException(Throwable cause, Object detail) {
     super(cause);
-    this.details = details;
+    this.detail = detail;
   }
 
   public VaadinServiceException(String message, Throwable cause) {
     super(message, cause);
-    this.details = null;
+    this.detail = null;
   }
 
   public VaadinServiceException(String message, Throwable cause,
-      Object details) {
+      Object detail) {
     super(message, cause);
-    this.details = details;
+    this.detail = detail;
   }
 
-  public Object getDetails() {
-    return details;
+  public Object getDetail() {
+    return detail;
   }
 }
