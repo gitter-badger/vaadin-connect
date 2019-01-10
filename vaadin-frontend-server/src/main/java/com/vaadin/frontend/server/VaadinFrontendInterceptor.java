@@ -51,21 +51,25 @@ public class VaadinFrontendInterceptor
 
     if (handler instanceof ResourceHttpRequestHandler) {
       // Check whether the static resource can be handled
+      HttpServletResponseWrapper responseWrapper = new HttpServletResponseWrapper(
+          response) {
+
+        @Override
+        public void sendError(int sc) throws IOException {
+          if (sc == HttpServletResponse.SC_NOT_FOUND) {
+            // forward to root if not found
+            try {
+              request.getRequestDispatcher("/").forward(request, response);
+            } catch (ServletException e) {
+              throw new IOException(e);
+            }
+          }
+        }
+      };
       ((ResourceHttpRequestHandler) handler).handleRequest(request,
           // Use a wrapper to catch the not found error
-          new HttpServletResponseWrapper(response) {
-            @Override
-            public void sendError(int sc) throws IOException {
-              if (sc == HttpServletResponse.SC_NOT_FOUND) {
-                // forward to root if not found
-                try {
-                  request.getRequestDispatcher("/").forward(request, response);
-                } catch (ServletException e) {
-                  throw new IOException(e);
-                }
-              }
-            }
-          });
+          responseWrapper);
+      return false;
     }
 
     return true;
